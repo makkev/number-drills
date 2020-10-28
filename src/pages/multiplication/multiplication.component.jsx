@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
+import MultiplicationSettings from '../../components/multiplication-settings/multiplication-settings.component';
+import MultiplicationDrillPage from '../multiplication-drill/multiplication-drill.component';
+
+import { shuffle, filterQuestions } from './multiplication.utils';
 import './multiplication.styles.scss';
 
-const handleOnClick = (num, select, setSelect) => {
-  setSelect({
-    ...select,
-    [num]: !select[num],
-  });
-};
+import { quiz } from '../../data/quiz';
 
 const tablesOptions = [2, 3, 4, 5, 6, 7, 8, 9, 12];
 
@@ -24,28 +23,40 @@ const MultiplicationPage = () => {
     12: false,
   });
 
+  const [isStart, setIsStart] = useState(false);
+
+  const [selectedQuestions, setSelectedQuestions] = useState([]);
+
   useEffect(() => {
     console.log(select);
   }, [select]);
 
-  return (
-    <div className="multiplication-page">
-      <h1 className="title">Multiplication Tables</h1>
-      <div className="info">Practice is the key to success!!!</div>
-      <h2 className="select">Select multiplication tables:</h2>
+  // const handleOnClick = (num, select, setSelect) => {
+  const handleOnSelect = num => {
+    setSelect({
+      ...select,
+      [num]: !select[num],
+    });
+  };
 
-      <div className="selections">
-        {tablesOptions.map(n => (
-          <div
-            key={n}
-            className={select[n] ? 'selected' : 'not-selected'}
-            onClick={() => handleOnClick(n, select, setSelect)}
-          >
-            {n}
-          </div>
-        ))}
-      </div>
-    </div>
+  const handleStart = () => {
+    setIsStart(!isStart);
+    setSelectedQuestions(shuffle(filterQuestions(quiz.questions, select)));
+  };
+
+  // console.log('history', history);
+  console.log('isStart: ', isStart);
+
+  return isStart ? (
+    <MultiplicationDrillPage questions={selectedQuestions} />
+  ) : (
+    <MultiplicationSettings
+      tablesOptions={tablesOptions}
+      select={select}
+      handleOnSelect={handleOnSelect}
+      isStart={isStart}
+      toggleStart={handleStart}
+    />
   );
 };
 
