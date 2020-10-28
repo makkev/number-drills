@@ -59,14 +59,22 @@ const MultiplicationDrillPage = ({ questions }) => {
           }`}</div>
           <div>{`${questions[currentQuestIdx].number1} x ${questions[currentQuestIdx].number2} =`}</div>
           <form onSubmit={checkAnswer}>
-            <input
-              type="text"
-              // readOnly={!this.state.showSubmitButton}
-              autoFocus
-              value={currentAnswer}
-              onChange={handleOnChange}
-              // ref={a => (this._inputAnswer = a)}
-            />
+            <div>
+              <input
+                type="text"
+                // readOnly={!this.state.showSubmitButton}
+                autoFocus
+                value={currentAnswer}
+                onChange={handleOnChange}
+                // ref={a => (this._inputAnswer = a)}
+              />
+              {isCorrect && currentStage === StageTypes.SHOW_RESULTS && (
+                <div>&#10004;</div>
+              )}
+              {!isCorrect && currentStage === StageTypes.SHOW_RESULTS && (
+                <div>&#10006;</div>
+              )}
+            </div>
 
             {currentStage === StageTypes.WAIT_FOR_ANSWER && (
               <div className="button-container">
