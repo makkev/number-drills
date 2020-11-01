@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import Results from '../../components/results/results.component';
+import ProgressBar from '../../components/progress-bar/progress-bar.component';
 
 import StageTypes from './stage.types';
 
@@ -14,6 +15,34 @@ const MultiplicationDrillPage = ({ questions }) => {
   const [isCorrect, setIsCorrect] = useState(false);
   const [score, setScore] = useState(0);
   const [answersGiven, setAnswersGiven] = useState([]);
+  const [time, setTime] = useState({
+    hrs: 0,
+    sec: 0,
+  });
+  // const [timeInterval, setTimeInterval] = useState(null);
+  const interval = useRef(null);
+
+  useEffect(() => {
+    if (currentStage !== StageTypes.SHOW_RESULTS) {
+      interval.current = setInterval(incrementTime, 1000);
+    }
+  }, []);
+
+  const incrementTime = () => {
+    setTime(prevState => {
+      if (prevState.sec + 1 === 60) {
+        return {
+          hrs: prevState.hrs + 1,
+          sec: 0,
+        };
+      } else {
+        return {
+          hrs: prevState.hrs,
+          sec: prevState.sec + 1,
+        };
+      }
+    });
+  };
 
   const resetValues = () => {
     setCurrentAnswer('');
@@ -22,7 +51,12 @@ const MultiplicationDrillPage = ({ questions }) => {
 
   const handleOnChange = e => {
     const { value } = e.target;
-    setCurrentAnswer(Number(value));
+    const regexp = /\d+\b/;
+    if (regexp.test(value)) {
+      setCurrentAnswer(Number(value));
+    } else {
+      return;
+    }
   };
 
   const checkAnswer = event => {
@@ -41,6 +75,7 @@ const MultiplicationDrillPage = ({ questions }) => {
       // TODO: testing
       // if (currentQuestIdx + 1 >= 2) {
       setCurrentStage(StageTypes.SHOW_RESULTS);
+      clearInterval(interval.current);
       return;
     }
     setCurrentQuestion(currentQuestIdx + 1);
@@ -48,12 +83,14 @@ const MultiplicationDrillPage = ({ questions }) => {
     setCurrentStage(StageTypes.WAIT_FOR_ANSWER);
   };
 
+  const zeroPad = (num, places) => String(num).padStart(places, '0');
+
   return (
     <div className="multiplication-drill-page">
       <div className="question-container">
         <div className="question-info">
           <div>Score: {score}</div>
-          <div>Time: 10</div>
+          <div>Time: {`${zeroPad(time.hrs, 2)}:${zeroPad(time.sec, 2)}`}</div>
         </div>
 
         {currentStage === StageTypes.SHOW_RESULTS && (
@@ -62,9 +99,16 @@ const MultiplicationDrillPage = ({ questions }) => {
 
         {currentStage !== StageTypes.SHOW_RESULTS && (
           <div className="question-body">
-            <div className="question-number">{`${currentQuestIdx + 1}/${
-              questions.length + 1
-            }`}</div>
+            <div className="question-number-section">
+              <div className="question-number">
+                {`${currentQuestIdx + 1}/${questions.length + 1}`}
+              </div>
+              <ProgressBar
+                max={questions.length}
+                current={currentQuestIdx + 1}
+              />
+            </div>
+
             <div>{`${questions[currentQuestIdx].number1} x ${questions[currentQuestIdx].number2} =`}</div>
             <form onSubmit={checkAnswer}>
               <div>

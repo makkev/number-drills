@@ -1,0 +1,15 @@
+.progress-bar {
+  width: 10rem;
+  height: 2rem;
+  border: 1px solid #16a085;
+  border-left: 0px;
+  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+
+  .progress-bar-full {
+    height: 2rem;
+    background-color: #16a085;
+    width: 0%;
+  }
+}

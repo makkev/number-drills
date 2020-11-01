@@ -21,8 +21,11 @@
     border-radius: 10px;
     text-align: center;
     // border: solid 1px red;
+    .question-number-section {
+      display: flex;
+    }
     .question-number {
-      font-size: 30px;
+      font-size: 25px;
       margin-bottom: 20px;
       text-align: left;
     }
