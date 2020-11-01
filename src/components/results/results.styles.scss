@@ -1,0 +1,10 @@
+.result-line {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-direction: row;
+}
+
+.wrong-answer {
+  color: red;
+}

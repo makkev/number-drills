@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+import Results from '../../components/results/results.component';
+
 import StageTypes from './stage.types';
 
 import './multiplication-drill.styles.scss';
@@ -11,10 +13,7 @@ const MultiplicationDrillPage = ({ questions }) => {
   const [currentStage, setCurrentStage] = useState(StageTypes.WAIT_FOR_ANSWER);
   const [isCorrect, setIsCorrect] = useState(false);
   const [score, setScore] = useState(0);
-
-  useEffect(() => {}, [currentAnswer]);
-
-  console.log(isCorrect);
+  const [answersGiven, setAnswersGiven] = useState([]);
 
   const resetValues = () => {
     setCurrentAnswer('');
@@ -28,18 +27,22 @@ const MultiplicationDrillPage = ({ questions }) => {
 
   const checkAnswer = event => {
     event.preventDefault();
-    console.log('currentAnswer', currentAnswer);
-    console.log(questions[currentQuestIdx].correctAnswer);
-    console.log('-------');
     if (currentAnswer === questions[currentQuestIdx].correctAnswer) {
       setIsCorrect(true);
       setScore(score + 1);
     }
+    setAnswersGiven(prevState => [...prevState, currentAnswer]);
 
-    setCurrentStage(StageTypes.SHOW_RESULTS);
+    setCurrentStage(StageTypes.CHECK_ANSWER);
   };
 
   const handleNext = () => {
+    if (currentQuestIdx + 1 >= questions.length) {
+      // TODO: testing
+      // if (currentQuestIdx + 1 >= 2) {
+      setCurrentStage(StageTypes.SHOW_RESULTS);
+      return;
+    }
     setCurrentQuestion(currentQuestIdx + 1);
     resetValues();
     setCurrentStage(StageTypes.WAIT_FOR_ANSWER);
@@ -53,50 +56,65 @@ const MultiplicationDrillPage = ({ questions }) => {
           <div>Time: 10</div>
         </div>
 
-        <div className="question-body">
-          <div className="question-number">{`${currentQuestIdx + 1}/${
-            questions.length + 1
-          }`}</div>
-          <div>{`${questions[currentQuestIdx].number1} x ${questions[currentQuestIdx].number2} =`}</div>
-          <form onSubmit={checkAnswer}>
-            <div>
-              <input
-                type="text"
-                // readOnly={!this.state.showSubmitButton}
-                autoFocus
-                value={currentAnswer}
-                onChange={handleOnChange}
-                // ref={a => (this._inputAnswer = a)}
-              />
-              {isCorrect && currentStage === StageTypes.SHOW_RESULTS && (
-                <div>&#10004;</div>
-              )}
-              {!isCorrect && currentStage === StageTypes.SHOW_RESULTS && (
-                <div>&#10006;</div>
-              )}
-            </div>
+        {currentStage === StageTypes.SHOW_RESULTS && (
+          <Results questions={questions} answersGiven={answersGiven} />
+        )}
 
-            {currentStage === StageTypes.WAIT_FOR_ANSWER && (
-              <div className="button-container">
-                <button
-                  className="go-button"
-                  type="submit"
-                  // onClick={() => setCurrentQuestion(currentQuestIdx + 1)}
-                >
-                  Submit
-                </button>
+        {currentStage !== StageTypes.SHOW_RESULTS && (
+          <div className="question-body">
+            <div className="question-number">{`${currentQuestIdx + 1}/${
+              questions.length + 1
+            }`}</div>
+            <div>{`${questions[currentQuestIdx].number1} x ${questions[currentQuestIdx].number2} =`}</div>
+            <form onSubmit={checkAnswer}>
+              <div>
+                <input
+                  type="text"
+                  readOnly={currentStage !== StageTypes.WAIT_FOR_ANSWER}
+                  // disabled={currentStage !== StageTypes.WAIT_FOR_ANSWER}
+                  autoFocus
+                  value={currentAnswer}
+                  onChange={handleOnChange}
+                  // ref={a => (this._inputAnswer = a)}
+                  style={
+                    currentStage === StageTypes.CHECK_ANSWER
+                      ? { background: '#ecf0f1' }
+                      : {}
+                  }
+                />
+                {isCorrect && currentStage === StageTypes.CHECK_ANSWER && (
+                  <div style={{ color: '#16a085' }}>&#10004;</div>
+                )}
+                {!isCorrect && currentStage === StageTypes.CHECK_ANSWER && (
+                  <div>
+                    <div style={{ color: '#e74c3c' }}>&#10006;</div>
+                    <div className="correction-text">{`Correct answer is ${questions[currentQuestIdx].correctAnswer}`}</div>
+                  </div>
+                )}
               </div>
-            )}
+              {/* TODO: enable this component on mobile devices  */}
+              {/* {currentStage === StageTypes.WAIT_FOR_ANSWER && (
+                <div className="button-container">
+                  <button
+                    className="go-button"
+                    type="submit"
+                    // onClick={() => setCurrentQuestion(currentQuestIdx + 1)}
+                  >
+                    Submit
+                  </button>
+                </div>
+              )} */}
 
-            {currentStage === StageTypes.SHOW_RESULTS && (
-              <div className="button-container">
-                <button className="go-button" onClick={() => handleNext()}>
-                  Next
-                </button>
-              </div>
-            )}
-          </form>
-        </div>
+              {currentStage === StageTypes.CHECK_ANSWER && (
+                <div className="button-container">
+                  <button className="go-button" onClick={() => handleNext()}>
+                    Next
+                  </button>
+                </div>
+              )}
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
